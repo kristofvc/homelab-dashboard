@@ -1,6 +1,14 @@
 const $ = id => document.getElementById(id);
 let current = null;
 let busy = false;
+const serviceStyles = {
+  argocd: {accent: "mint", icon: "↗", category: "Control plane"},
+  "home-assistant": {accent: "blue", icon: "⌂", category: "Home automation"},
+  authentik: {accent: "coral", icon: "◎", category: "Identity"},
+  scruffy: {accent: "pink", icon: "▦", category: "Infrastructure"},
+  roberto: {accent: "pink", icon: "▦", category: "Infrastructure"},
+  grafana: {accent: "orange", icon: "◴", category: "Monitoring"},
+};
 const date = value => value ? new Date(value).toLocaleString("nl-BE") : "Nog niet gesynchroniseerd";
 function el(tag, text, className) {
   const node = document.createElement(tag);
@@ -34,8 +42,13 @@ async function detail(service) {
 }
 function renderServices(data) {
   $("services").replaceChildren(...data.services.map(service => {
-    const card=el("article",undefined,"card");
-    card.append(el("h3",service.name));
+    const style=serviceStyles[service.id] || {accent:"gold",icon:"✦",category:"Service"};
+    const card=el("article",undefined,"card accent-"+style.accent);
+    const heading=el("div",undefined,"card-heading");
+    const icon=el("span",style.icon,"app-icon");icon.setAttribute("aria-hidden","true");
+    const title=el("div");
+    title.append(el("p",style.category,"app-category"),el("h3",service.name));
+    heading.append(icon,title);card.append(heading);
     const row=el("div",undefined,"row");
     row.append(badge(service.status),link("Open ↗",service.url));card.append(row);
     card.append(el("p",service.latency_ms+" ms","latency"));
