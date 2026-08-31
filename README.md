@@ -13,6 +13,10 @@ Source lives here; Kubernetes desired state lives in `kristofvc/homelab`.
   chart versions, sync/health and the last completed sync operation.
 - Retains the last deployment result with a visible warning if refresh fails.
 - Keeps 120 checks per service in memory; restarting clears this history.
+- Shows Kubernetes node Ready state, five-minute CPU usage and RAM usage from
+  Prometheus. RAM is `100 * (1 - MemAvailable / MemTotal)`, not pod requests or
+  Proxmox's host/balloon accounting. Missing metrics show a dash, never zero.
+  Failed refreshes retain the previous values with an explicit stale warning.
 - Preserves service links including UniFi. Provides read-only details and search.
 
 Last sync is **not** a release history or proof that a particular image is running.
@@ -40,6 +44,9 @@ is generated. Dependencies, including transitive dependencies, are pinned in
 - `SERVICES_JSON`: optional operator-controlled list of service definitions matching
   `DEFAULT_SERVICES` in app.py. Only trusted config, never accept arbitrary user URLs.
 - `ARGO_NAMESPACE`: defaults to `argocd`.
+- `PROMETHEUS_URL`: optional internal Prometheus origin. Only fixed node queries
+  run server-side every refresh, with a 120-second lookback and healthy-scrape
+  filters. No public Prometheus endpoint or extra Kubernetes permissions needed.
 - `SERVICE_ACCOUNT_PATH`: Kubernetes projected token/CA path. Tokens are re-read
   each poll to support rotation. The service account needs only `list` on
   `applications.argoproj.io` in the `argocd` namespace. No Secret access or writes.

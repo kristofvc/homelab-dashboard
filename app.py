@@ -13,6 +13,7 @@ import time
 from urllib.parse import quote, urlparse
 
 import httpx
+from node_metrics import fetch_nodes
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -27,6 +28,7 @@ ROOT = Path(__file__).parent
 INTERVAL = max(10, int(os.getenv("CHECK_INTERVAL_SECONDS", "30")))
 SA = Path(os.getenv("SERVICE_ACCOUNT_PATH", "/var/run/secrets/kubernetes.io/serviceaccount"))
 ARGO_NAMESPACE = os.getenv("ARGO_NAMESPACE", "argocd")
+PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "")
 if not re.fullmatch(r"[a-z0-9-]+", ARGO_NAMESPACE):
     raise ValueError("Invalid Argo namespace")
 DEFAULT_SERVICES = [
@@ -52,7 +54,8 @@ duration = Histogram("homelab_check_duration_seconds", "Service probe duration",
 available = Gauge("homelab_service_available", "Probe success; see probe type for semantics", ["service"])
 last_refresh = Gauge("homelab_last_refresh_timestamp_seconds", "Last completed refresh")
 history = {s["id"]: deque(maxlen=120) for s in SERVICES}
-snapshot = {"checked_at": None, "services": [], "deployments": [], "deployments_checked_at": None, "deployments_error": "Not checked yet", "trace_id": None}
+snapshot = {"checked_at": None, "services": [], "deployments": [], "deployments_checked_at": None, "deployments_error": "Not checked yet", "trace_id": None,
+            "nodes": [], "nodes_checked_at": None, "nodes_error": "Not checked yet"}
 
 
 def now():
@@ -138,9 +141,21 @@ async def refresh(client, kube_client):
             span.set_status(trace.Status(trace.StatusCode.ERROR, "Deployment refresh failed"))
         for result in services:
             history[result["id"]].append(dict(result))
+        nodes, nodes_at = snapshot.get("nodes", []), snapshot.get("nodes_checked_at")
+        nodes_error = None
+        try:
+            if not PROMETHEUS_URL:
+                nodes_error = "Prometheus niet geconfigureerd"
+            else:
+                with tracer.start_as_current_span("prometheus.nodes"):
+                    nodes = await fetch_nodes(client, PROMETHEUS_URL)
+                nodes_at = now()
+        except (httpx.HTTPError, OSError, ValueError, KeyError, TypeError, IndexError) as exc:
+            nodes_error = f"Nodemeting mislukt ({type(exc).__name__}); vorige meting behouden"
         context = span.get_span_context()
         snapshot = {"checked_at": now(), "services": services, "deployments": deployments,
                     "deployments_checked_at": deployments_at, "deployments_error": error,
+                    "nodes": nodes, "nodes_checked_at": nodes_at, "nodes_error": nodes_error,
                     "trace_id": format(context.trace_id, "032x") if context.is_valid else None}
         last_refresh.set(time.time())
         logging.info(json.dumps({"event": "refresh", "services": len(services), "failed": sum(s["status"] in ("unhealthy", "unreachable") for s in services), "deployment_error": bool(error), "trace_id": snapshot["trace_id"]}))

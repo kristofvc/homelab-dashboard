@@ -40,6 +40,32 @@ async function detail(service) {
     }));
   } catch { $("detail-content").replaceChildren(el("p","Geschiedenis kon niet geladen worden.")); }
 }
+function renderNodes(data) {
+  const stale = !data.nodes_checked_at || Date.now()-Date.parse(data.nodes_checked_at)>data.interval_seconds*3000;
+  const unavailable = stale || Boolean(data.nodes_error);
+  $("nodes-error").hidden = !unavailable;
+  $("nodes-error").textContent = data.nodes_error || "Geen recente nodemeting; gegevens kunnen verouderd zijn.";
+  $("nodes-updated").textContent = data.nodes_checked_at ? "Meting: "+date(data.nodes_checked_at)+(unavailable ? " · verouderd" : "") : "";
+  const cards = (data.nodes || []).map(node => {
+    const card = el("article",undefined,"node-card"+(unavailable ? " stale" : ""));
+    const heading = el("div",undefined,"row");
+    const name = el("h3",node.name.replace(/^k3s-\d+-/,"")); name.title=node.name;
+    heading.append(name,el("span",unavailable || node.ready == null ? "Onbekend" : node.ready ? "Ready" : "Not ready","badge "+(unavailable || node.ready == null ? "neutral" : node.ready ? "good" : "bad")));
+    card.append(heading);
+    for(const [label,key] of [["CPU","cpu_percent"],["RAM","memory_percent"]]) {
+      const value=node[key];
+      const row=el("div",undefined,"node-metric");
+      row.append(el("span",label),el("strong",value == null ? "—" : value.toFixed(1)+"%"));
+      if(value != null) {
+        const meter=el("meter");meter.min=0;meter.max=100;meter.low=75;meter.high=90;meter.optimum=0;meter.value=value;
+        meter.setAttribute("aria-label",node.name+" "+label+(unavailable ? " (verouderd)" : ""));row.append(meter);
+      }
+      card.append(row);
+    }
+    return card;
+  });
+  $("nodes").replaceChildren(...(cards.length ? cards : [el("p","Geen nodemetingen beschikbaar.","muted")]));
+}
 function renderServices(data) {
   $("services").replaceChildren(...data.services.map(service => {
     const style=serviceStyles[service.id] || {accent:"gold",icon:"✦",category:"Service"};
@@ -92,7 +118,7 @@ async function load() {
     $("deployment-error").textContent=current.deployments_error || "";
     $("deployment-updated").textContent=current.deployments_checked_at ? "Deploymentgegevens van "+date(current.deployments_checked_at) : "Nog geen deploymentmeting";
     $("trace").textContent=current.trace_id ? "Refresh trace: "+current.trace_id : "Trace-export nog niet aangesloten";
-    renderServices(current);renderDeployments();
+    renderNodes(current);renderServices(current);renderDeployments();
   }catch {
     $("error").hidden=false;$("error").textContent="Dashboard-API niet bereikbaar. Eventuele eerdere gegevens zijn niet actueel.";
   }finally{busy=false;}
