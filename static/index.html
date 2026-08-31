@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="nl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10151f"><title>Homelab Control Center</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
+<body>
+<main>
+<header><div><p class="eyebrow">SCRUFFY / ROBERTO</p><h1>Homelab <span>Control Center</span></h1><p class="muted">Bereikbaarheid, gezondheid en deployments. Eén plek voor je cluster.</p></div><a class="button" href="https://grafana.homelab.kristofvc.be/">Open Grafana ↗</a></header>
+<nav aria-label="Snelle links"><a href="https://argocd.homelab.kristofvc.be/">Argo CD ↗</a><a href="https://homeassistant.homelab.kristofvc.be/">Home Assistant ↗</a><a href="https://auth.homelab.kristofvc.be/">Authentik ↗</a><a href="https://scruffy.homelab.kristofvc.be/">Scruffy ↗</a><a href="https://roberto.homelab.kristofvc.be/">Roberto ↗</a><a href="https://unifi">UniFi ↗</a></nav>
+<div class="toolbar"><p id="updated" class="muted" aria-live="polite">Wachten op eerste meting…</p><button id="refresh">Ververs weergave</button></div>
+<p id="error" class="warning" hidden role="alert"></p>
+<section aria-labelledby="services-title"><div class="section-head"><h2 id="services-title">Services</h2><span class="muted">Periodieke checks · geen volledige end-to-end tests</span></div><div id="services" class="grid"><p class="muted">Status wordt opgehaald…</p></div></section>
+<section aria-labelledby="deployments-title"><div class="section-head"><div><h2 id="deployments-title">Deployments</h2><p class="muted">Argo CD is de bron. Laatste sync is niet noodzakelijk de laatste app-release.</p></div><input id="search" type="search" placeholder="Zoek een applicatie…" aria-label="Zoek applicatie"></div><p id="deployment-error" class="warning" hidden></p><p id="deployment-updated" class="muted"></p><div class="table-wrap"><table><thead><tr><th>Applicatie</th><th>Gezondheid</th><th>GitOps</th><th>Revisie / chart</th><th>Laatste sync</th><th></th></tr></thead><tbody id="deployments"><tr><td colspan="6">Nog geen deploymentgegevens.</td></tr></tbody></table></div></section>
+<footer><span>Read-only · geen beheeracties</span><span id="trace"></span></footer>
+<dialog id="detail"><div class="section-head"><h2 id="detail-title">Recente controles</h2><button id="close">Sluiten</button></div><p class="muted">Maximaal 120 metingen in geheugen. Geschiedenis reset bij herstart.</p><div id="detail-content"></div></dialog>
+</main></body></html>
