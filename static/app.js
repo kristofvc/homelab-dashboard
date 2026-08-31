@@ -15,7 +15,7 @@ function badge(text) {
   return el("span",labels[text] || text,"badge "+(good ? "good" : bad ? "bad" : "neutral"));
 }
 function link(text, url) {
-  const node = el("a",text); node.href = url; node.rel = "noopener noreferrer"; return node;
+  const node = el("a",text); node.href = url; node.target = "_blank"; node.rel = "noopener noreferrer"; return node;
 }
 async function detail(service) {
   $("detail-title").textContent = service.name + " · recente checks";
