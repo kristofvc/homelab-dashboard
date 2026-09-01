@@ -95,6 +95,8 @@ class RouteTests(unittest.TestCase):
         avatar = self.client.get("/static/momcorp.png")
         self.assertEqual(avatar.status_code, 200)
         self.assertEqual(avatar.headers["content-type"], "image/png")
+        self.assertEqual(self.client.get("/static/favicon-32.png").status_code, 200)
+        self.assertEqual(self.client.get("/static/apple-touch-icon.png").status_code, 200)
         self.assertEqual(self.client.get("/healthz").json(), {"status": "ok"})
         self.assertIn("homelab_check_duration_seconds", self.client.get("/metrics").text)
         self.assertEqual(self.client.get("/api/services/arbitrary-url").status_code, 404)
