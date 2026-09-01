@@ -92,6 +92,9 @@ class RouteTests(unittest.TestCase):
 
     def test_static_health_metrics_and_unknown_service(self):
         self.assertEqual(self.client.get("/").status_code, 200)
+        avatar = self.client.get("/static/momcorp.png")
+        self.assertEqual(avatar.status_code, 200)
+        self.assertEqual(avatar.headers["content-type"], "image/png")
         self.assertEqual(self.client.get("/healthz").json(), {"status": "ok"})
         self.assertIn("homelab_check_duration_seconds", self.client.get("/metrics").text)
         self.assertEqual(self.client.get("/api/services/arbitrary-url").status_code, 404)
