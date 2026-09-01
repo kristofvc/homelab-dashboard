@@ -13,6 +13,8 @@ import time
 from urllib.parse import quote, urlparse
 
 import httpx
+import pyroscope
+from pyroscope.otel import PyroscopeSpanProcessor
 from node_metrics import fetch_nodes
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
@@ -164,8 +166,27 @@ async def refresh(client, kube_client):
 @asynccontextmanager
 async def lifespan(app):
     provider = None
+    profiler = False
+    pyroscope_url = os.getenv("PYROSCOPE_SERVER_ADDRESS")
+    if pyroscope_url:
+        try:
+            pyroscope.configure(
+                application_name="homelab-dashboard",
+                server_address=pyroscope_url,
+                sample_rate=100,
+                cpu_enabled=True,
+                mem_enabled=True,
+                mem_heap_sample_size=512 * 1024,
+                enable_logging=False,
+                tags={"cluster": "homelab", "namespace": "homelab-dashboard"},
+            )
+            profiler = True
+        except Exception as exc:
+            logging.error(json.dumps({"event": "profiler_start_failed", "error": type(exc).__name__}))
     if os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"):
         provider = TracerProvider(resource=Resource.create({"service.name": "homelab-dashboard"}))
+        if profiler:
+            provider.add_span_processor(PyroscopeSpanProcessor())
         provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(timeout=5)))
         trace.set_tracer_provider(provider)
     async with httpx.AsyncClient(timeout=5, follow_redirects=False, trust_env=False) as client:
@@ -190,6 +211,8 @@ async def lifespan(app):
                 await kube.aclose()
             if provider:
                 await asyncio.to_thread(provider.shutdown)
+            if profiler:
+                await asyncio.to_thread(pyroscope.shutdown)
 
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)

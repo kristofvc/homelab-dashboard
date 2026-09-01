@@ -20,6 +20,8 @@ prometheus_client==0.26.0
 protobuf==7.36.0
 pydantic==2.13.5
 pydantic_core==2.46.5
+pyroscope-io==1.2.1
+pyroscope-otel==1.1.0
 requests==2.34.2
 starlette==1.6.0
 typing-inspection==0.4.4

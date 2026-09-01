@@ -52,6 +52,10 @@ is generated. Dependencies, including transitive dependencies, are pinned in
   `applications.argoproj.io` in the `argocd` namespace. No Secret access or writes.
 - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`: optional complete OTLP/HTTP URL ending
   `/v1/traces`. When unset, tracing is a no-op and the UI says so.
+- `PYROSCOPE_SERVER_ADDRESS`: optional internal Pyroscope origin. When set, the
+  single Uvicorn process exports 100 Hz CPU samples and sampled Python allocations.
+  The Pyroscope OpenTelemetry bridge labels eligible root spans so Grafana can link
+  traces to profiles. Profiling startup failure is logged without stopping status.
 
 The browser only reads cached results; refresh never triggers upstream traffic.
 Run **one Uvicorn worker and one replica** for this in-memory design. Background

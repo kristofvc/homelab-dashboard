@@ -85,6 +85,9 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(self.client.get("/api/services/arbitrary-url").status_code, 404)
         self.assertEqual(self.client.post("/api/status").status_code, 405)
 
+    def test_profiling_is_opt_in(self):
+        self.assertIsNone(app.os.getenv("PYROSCOPE_SERVER_ADDRESS"))
+
 
 if __name__ == "__main__":
     unittest.main()
