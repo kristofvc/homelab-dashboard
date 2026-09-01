@@ -1,4 +1,4 @@
-# Homelab Control Center
+# MomCorp Homelab
 
 Read-only status and deployment overview for Kristof's homelab. FastAPI backend,
 plain HTML/CSS/JavaScript frontend, one container, no database or frontend build.
@@ -6,7 +6,7 @@ Source lives here; Kubernetes desired state lives in `kristofvc/homelab`.
 
 ## What it does
 
-- Checks Argo CD, Home Assistant, Authentik, Scruffy, Roberto and Grafana every 30s.
+- Checks Argo CD, Home Assistant, Authentik, Scruffy, Roberto, Grafana and UniFi every 30s.
 - Distinguishes explicit health endpoints from simple HTTP reachability (a login
   page or 401 is not proof that all application internals work).
 - Lists Argo Applications through Kubernetes, including multi-source revisions,
@@ -17,7 +17,9 @@ Source lives here; Kubernetes desired state lives in `kristofvc/homelab`.
   Prometheus. RAM is `100 * (1 - MemAvailable / MemTotal)`, not pod requests or
   Proxmox's host/balloon accounting. Missing metrics show a dash, never zero.
   Failed refreshes retain the previous values with an explicit stale warning.
-- Preserves service links including UniFi. Provides read-only details and search.
+- Preserves service links, including the local `https://unifi` shortcut. UniFi is
+  probed through its certificate-valid `https://home.kristofvc.be` address.
+  Provides read-only details and search.
 
 Last sync is **not** a release history or proof that a particular image is running.
 Argo reports desired-state reconciliation, not every application's internal state.

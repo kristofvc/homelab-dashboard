@@ -40,12 +40,16 @@ DEFAULT_SERVICES = [
     {"id": "scruffy", "name": "Proxmox · Scruffy", "url": "https://scruffy.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "roberto", "name": "Proxmox · Roberto", "url": "https://roberto.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "grafana", "name": "Grafana", "url": "https://grafana.homelab.kristofvc.be", "path": "/api/health", "probe": "health"},
+    {"id": "unifi", "name": "UniFi", "url": "https://unifi", "probe_url": "https://home.kristofvc.be", "path": "/", "probe": "reachability"},
 ]
 SERVICES = json.loads(os.getenv("SERVICES_JSON", json.dumps(DEFAULT_SERVICES)))
 for service in SERVICES:
-    parsed = urlparse(service["url"])
-    if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
-        raise ValueError("Service URLs must be credential-free HTTPS origins")
+    for field in ("url", "probe_url"):
+        if field not in service:
+            continue
+        parsed = urlparse(service[field])
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("Service URLs must be credential-free HTTPS origins")
     if not service.get("path", "/").startswith("/") or service.get("probe") not in ("health", "reachability"):
         raise ValueError("Invalid service probe")
 
@@ -100,7 +104,8 @@ async def check_service(client, service):
     with tracer.start_as_current_span("service.check", attributes={"service.id": service["id"], "probe.type": service["probe"]}) as span:
         try:
             # Read headers only. Bodies may be large or contain sensitive data.
-            async with client.stream("GET", service["url"].rstrip("/") + service["path"]) as response:
+            probe_url = service.get("probe_url", service["url"])
+            async with client.stream("GET", probe_url.rstrip("/") + service["path"]) as response:
                 code = response.status_code
             ok = 200 <= code < 300 if service["probe"] == "health" else 200 <= code < 400 or code in (401, 403)
             result.update(status=("healthy" if service["probe"] == "health" else "reachable") if ok else "unhealthy", http_status=code)

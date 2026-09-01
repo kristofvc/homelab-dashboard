@@ -49,6 +49,18 @@ class CheckTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(out["status"], "unreachable")
         self.assertNotIn("SECRET", json.dumps(out))
 
+    async def test_distinct_probe_url_keeps_display_link(self):
+        requested = []
+        def respond(request):
+            requested.append(str(request.url))
+            return httpx.Response(200)
+        service = {"id": "unifi", "name": "UniFi", "url": "https://unifi", "probe_url": "https://home.kristofvc.be", "path": "/", "probe": "reachability"}
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
+            out = await app.check_service(client, service)
+        self.assertEqual(requested, ["https://home.kristofvc.be/"])
+        self.assertEqual(out["url"], "https://unifi")
+        self.assertEqual(out["status"], "reachable")
+
     async def test_stale_deployments_are_retained(self):
         original = app.snapshot
         app.snapshot = {**original, "deployments": [{"name": "previous"}], "deployments_checked_at": "old"}

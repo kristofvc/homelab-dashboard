@@ -8,6 +8,7 @@ const serviceStyles = {
   scruffy: {accent: "pink", icon: "▦", category: "Infrastructure"},
   roberto: {accent: "pink", icon: "▦", category: "Infrastructure"},
   grafana: {accent: "orange", icon: "◴", category: "Monitoring"},
+  unifi: {accent: "blue", icon: "◉", category: "Infrastructure"},
 };
 const date = value => value ? new Date(value).toLocaleString("nl-BE") : "Nog niet gesynchroniseerd";
 function el(tag, text, className) {
