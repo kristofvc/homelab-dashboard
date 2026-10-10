@@ -7,6 +7,7 @@ const serviceStyles = {
   authentik: {accent: "coral", icon: "◎", category: "Identity"},
   scruffy: {accent: "pink", icon: "▦", category: "Infrastructure"},
   roberto: {accent: "pink", icon: "▦", category: "Infrastructure"},
+  morbo: {accent: "pink", icon: "▦", category: "Infrastructure"},
   grafana: {accent: "orange", icon: "◴", category: "Monitoring"},
   unifi: {accent: "blue", icon: "◉", category: "Infrastructure"},
 };

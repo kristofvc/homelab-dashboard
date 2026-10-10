@@ -39,6 +39,7 @@ DEFAULT_SERVICES = [
     {"id": "authentik", "name": "Authentik", "url": "https://auth.homelab.kristofvc.be", "path": "/-/health/ready/", "probe": "health"},
     {"id": "scruffy", "name": "Proxmox · Scruffy", "url": "https://scruffy.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "roberto", "name": "Proxmox · Roberto", "url": "https://roberto.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
+    {"id": "morbo", "name": "Proxmox · Morbo", "url": "https://morbo.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "grafana", "name": "Grafana", "url": "https://grafana.homelab.kristofvc.be", "path": "/api/health", "probe": "health"},
     {"id": "unifi", "name": "UniFi", "url": "https://unifi", "probe_url": "https://home.kristofvc.be", "path": "/", "probe": "reachability"},
 ]

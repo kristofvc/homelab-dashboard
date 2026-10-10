@@ -6,7 +6,7 @@ Source lives here; Kubernetes desired state lives in `kristofvc/homelab`.
 
 ## What it does
 
-- Checks Argo CD, Home Assistant, Authentik, Scruffy, Roberto, Grafana and UniFi every 30s.
+- Checks Argo CD, Home Assistant, Authentik, Scruffy, Roberto, Morbo, Grafana and UniFi every 30s.
 - Distinguishes explicit health endpoints from simple HTTP reachability (a login
   page or 401 is not proof that all application internals work).
 - Lists Argo Applications through Kubernetes, including multi-source revisions,
