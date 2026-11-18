@@ -41,6 +41,11 @@ DEFAULT_SERVICES = [
     {"id": "roberto", "name": "Proxmox · Roberto", "url": "https://roberto.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "morbo", "name": "Proxmox · Morbo", "url": "https://morbo.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
     {"id": "grafana", "name": "Grafana", "url": "https://grafana.homelab.kristofvc.be", "path": "/api/health", "probe": "health"},
+    # Behind Authentik ForwardAuth: an unauthenticated probe gets the login redirect, so this shows
+    # that Traefik and the outpost answer; Zigbee2MQTT's own health is in Argo CD and the Loki alert.
+    {"id": "zigbee2mqtt", "name": "Zigbee2MQTT", "url": "https://zigbee2mqtt.homelab.kristofvc.be", "path": "/", "probe": "reachability"},
+    # /ha_info is the coordinator's read-only device summary; Authentik lets only this path through.
+    {"id": "slzb-06u", "name": "SMLIGHT SLZB-06U", "url": "https://slzb.homelab.kristofvc.be", "path": "/ha_info", "probe": "health"},
     {"id": "unifi", "name": "UniFi", "url": "https://unifi", "probe_url": "https://home.kristofvc.be", "path": "/", "probe": "reachability"},
 ]
 SERVICES = json.loads(os.getenv("SERVICES_JSON", json.dumps(DEFAULT_SERVICES)))
